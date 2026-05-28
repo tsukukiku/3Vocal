@@ -1,0 +1,131 @@
+YouTube Links for Uploaded Audio/Video File Names
+整理时间: 2026-05-28
+说明: 播放量为检索时的近似值，会随时间变化。优先选择播放量高、且尽量来自官方/权威频道的 YouTube 版本；个别中文老歌可能最高播放量版本不是官方频道。
+
+==============================
+A. 上一次 MP3 列表
+==============================
+
+01. 文件名: Ed Sheeran - Shape Of You ( cover by J.Fla ).mp3
+    歌曲/版本: Shape of You - J.Fla cover
+    YouTube: https://www.youtube.com/watch?v=MhQKe-aERsU
+    近似播放量: 约 359M
+
+02. 文件名: Edshoon Shape of You.mp3
+    歌曲/版本: Ed Sheeran - Shape of You
+    YouTube: https://www.youtube.com/watch?v=JGwWNGJdvx8
+    近似播放量: 约 6.7B
+
+03. 文件名: Musical Satisfied from HAMILTON.mp3
+    歌曲/版本: Satisfied - Hamilton
+    YouTube: https://www.youtube.com/watch?v=InupuylYdcY
+    近似播放量: 约 87M
+
+04. 文件名: 王俊余乐 爱太深.mp3
+    歌曲/版本: 爱太深 / 爱太深容易看见伤痕
+    YouTube: https://www.youtube.com/watch?v=K2qNE4K_lyY
+    近似播放量: 约 204K
+
+05. 文件名: 王杰 - 回家.mp3
+    歌曲/版本: 王杰 - 回家
+    YouTube: https://www.youtube.com/watch?v=Bw7Fi7KSpBs
+    近似播放量: 约 2.3M
+
+06. 文件名: 王杰 - 是否我真的一无所有.mp3
+    歌曲/版本: 王杰 - 是否我真的一无所有
+    YouTube: https://www.youtube.com/watch?v=bDgWkgQ1oXA
+    近似播放量: 约 11M
+
+07. 文件名: 林忆莲 - 爱上一个不回家的人.mp3
+    歌曲/版本: 林忆莲 - 爱上一个不回家的人
+    YouTube: https://www.youtube.com/watch?v=6pm8BVi1z7k
+    近似播放量: 约 5.1M
+
+08. 文件名: 姜育恒 - 再回首.mp3
+    歌曲/版本: 姜育恒 - 再回首
+    YouTube: https://www.youtube.com/watch?v=t2B_SPk77M0
+    近似播放量: 约 27M
+
+09. 文件名: 张雨生 - 大海.mp3
+    歌曲/版本: 张雨生 - 大海
+    YouTube: https://www.youtube.com/watch?v=EXaLvBGqQww
+    近似播放量: 约 54M
+
+10. 文件名: 张学友 - 一千个伤心的理由.mp3
+    歌曲/版本: 张学友 - 一千个伤心的理由
+    YouTube: https://www.youtube.com/watch?v=OiMZnvOK0p4
+    近似播放量: 约 6.5M
+
+11. 文件名: 张学友 - 等你等到我心痛.mp3
+    歌曲/版本: 张学友 - 等你等到我心痛
+    YouTube: https://www.youtube.com/watch?v=LYvKEp8sv6Y
+    近似播放量: 约 2.2M
+
+12. 文件名: 费翔 - 冬天里的一把火.mp3
+    歌曲/版本: 费翔 - 冬天里的一把火
+    YouTube: https://www.youtube.com/watch?v=3xKLu0xbNYw
+    近似播放量: 约 1.8M
+    备注: 该视频包含《故乡的云》+《冬天里的一把火》。
+
+13. 文件名: 车继铃 - 最远的你是我最近的爱.mp3
+    歌曲/版本: 车继铃 - 最远的你是我最近的爱
+    YouTube: https://www.youtube.com/watch?v=4UPKe2tKz54
+    近似播放量: 约 11M
+
+14. 文件名: 陈慧娴 - 千千阙歌.mp3
+    歌曲/版本: 陈慧娴 - 千千阙歌
+    YouTube: https://www.youtube.com/watch?v=UxmpcK1TRp0
+    近似播放量: 约 14M
+
+15. 文件名: 陈百强 - 一生何求.mp3
+    歌曲/版本: 陈百强 - 一生何求
+    YouTube: https://www.youtube.com/watch?v=jgECnV15V6M
+    近似播放量: 约 6M
+
+==============================
+B. 这一次 MP4 列表
+==============================
+
+16. 文件名: Elvis-Presley-Can-t-Help-Falling-In-Lov.mp4
+    歌曲/版本: Elvis Presley - Can't Help Falling In Love
+    YouTube: https://www.youtube.com/watch?v=vGJTaP6anOU
+    近似播放量: 约 469M
+
+17. 文件名: Libiamo ne lieti calici.mp4
+    歌曲/版本: The Three Tenors in Concert 1994: Brindisi / Libiamo ne' lieti calici from La Traviata
+    YouTube: https://www.youtube.com/watch?v=l7eHO_PEWLk
+    近似播放量: 约 71.7M
+
+18. 文件名: Luciano-Pavarotti-sings-Nessun-dorma.mp4
+    歌曲/版本: Luciano Pavarotti - Nessun Dorma! Official Live Performance Video
+    YouTube: https://www.youtube.com/watch?v=8uqPnY5hQDs
+    近似播放量: 约 134M
+    备注: 另一个标题更接近文件名的版本为 https://www.youtube.com/watch?v=cWc7vYjgnTs 。
+
+19. 文件名: Memory-Elaine-Paige-Cats-The-Musica.mp4
+    歌曲/版本: 'Memory' Elaine Paige | Cats The Musical
+    YouTube: https://www.youtube.com/watch?v=mdBVJbzkoqo
+    近似播放量: 约 13.4M
+
+20. 文件名: Michael-Jackson-Billie-Jean-Official.mp4
+    歌曲/版本: Michael Jackson - Billie Jean Official Video
+    YouTube: https://www.youtube.com/watch?v=Zi_XLOBDo_Y
+    近似播放量: 约 2.1B
+
+21. 文件名: Opera2 Vitas .mp4
+    歌曲/版本: Vitas - Opera #2
+    YouTube: https://www.youtube.com/watch?v=8-qZD6XHVCA
+    近似播放量: 约 20M
+    备注: 非官方/旧上传中也有更高播放量版本，例如 2009 版本约 29M: https://youtu.be/ZSenveV5QP4?t=1m11s 。
+
+22. 文件名: The-Most-Popular-Songs-From-The-Phantom.mp4
+    歌曲/版本: The Most Popular Songs From The Phantom of the Opera | Phantom of the Opera
+    YouTube: https://www.youtube.com/watch?v=_IJ-Dqm9E-8
+    近似播放量: 约 6.2M
+
+23. 文件名: Unchained-Melody-Remastered.mp4
+    歌曲/版本: The Righteous Brothers - Unchained Melody Remastered
+    YouTube: https://www.youtube.com/watch?v=Zv8czIoAw5w
+    近似播放量: 约 33M
+    备注: 若只按“Unchained Melody”最高播放量而不限定 Remastered，另有约 82M 或 76M 的版本。
+
