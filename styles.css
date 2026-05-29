@@ -339,7 +339,7 @@ body::-webkit-scrollbar-thumb:hover {
 
 .stage-symbol {
   border-radius: 4px;
-  filter: brightness(1.18) contrast(1.08) drop-shadow(0 0 6px rgba(255, 218, 150, 0.28));
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.28));
 }
 
 .panel-head {
@@ -1034,7 +1034,7 @@ body::-webkit-scrollbar-thumb:hover {
   position: fixed;
   left: max(var(--shell-pad), calc((100vw - var(--shell-max)) / 2 + var(--shell-pad)));
   right: max(var(--shell-pad), calc((100vw - var(--shell-max)) / 2 + var(--shell-pad)));
-  transform: none;
+  transform: translateY(0);
   bottom: 0;
   width: auto;
   max-width: calc(var(--shell-max) - (var(--shell-pad) * 2));
@@ -1042,6 +1042,22 @@ body::-webkit-scrollbar-thumb:hover {
   padding: 5px 8px max(5px, env(safe-area-inset-bottom));
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+  opacity: 1;
+  transition: transform 0.34s ease, opacity 0.28s ease;
+  will-change: transform, opacity;
+  z-index: 20;
+}
+
+.bottom-nav.is-hidden {
+  transform: translateY(calc(100% + 10px));
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bottom-nav.is-at-page-bottom {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .nav-item {
@@ -1062,6 +1078,14 @@ body::-webkit-scrollbar-thumb:hover {
   filter: brightness(0) invert(1);
 }
 
+.nav-item img.home-nav-icon {
+  width: 27px;
+  height: 27px;
+  margin-bottom: -3px;
+  opacity: 0.95;
+  filter: brightness(0) invert(1);
+}
+
 .nav-item.active {
   color: var(--gold);
   text-shadow: 0 0 9px rgba(255, 207, 129, 0.75), 0 0 18px rgba(255, 166, 96, 0.35);
@@ -1070,6 +1094,10 @@ body::-webkit-scrollbar-thumb:hover {
 .nav-item.active img {
   opacity: 1;
   filter: sepia(1) saturate(2.4) hue-rotate(345deg) brightness(1.25) drop-shadow(0 0 8px rgba(255, 207, 129, 0.75));
+}
+
+.nav-item.active img.home-nav-icon {
+  filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(255, 255, 255, 0.55));
 }
 
 .is-running .primary-btn {

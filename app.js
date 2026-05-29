@@ -56,7 +56,8 @@ const elements = {
   templateGrid: document.querySelector(".template-grid"),
   templatePanel: document.getElementById("templatePanel"),
   toggleTemplatesBtn: document.getElementById("toggleTemplatesBtn"),
-  navItems: document.querySelectorAll(".nav-item")
+  navItems: document.querySelectorAll(".nav-item"),
+  bottomNav: document.querySelector(".bottom-nav")
 };
 
 const clipToneMap = {
@@ -143,6 +144,7 @@ function init() {
   bindEvents();
   setupResultPlayer();
   setupTemplateLoopScroll();
+  setupBottomNavAutoHide();
   startStageSlideshow("female");
   loadWorksLibrary();
 }
@@ -243,6 +245,30 @@ function setupTemplateLoopScroll() {
   };
 
   state.templateAutoScrollFrame = window.requestAnimationFrame(tick);
+}
+
+function setupBottomNavAutoHide() {
+  if (!elements.bottomNav) return;
+
+  const bottomThreshold = 70;
+  const isNearPageBottom = () => (
+    window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - bottomThreshold
+  );
+
+  const updateBottomNav = () => {
+    if (isNearPageBottom()) {
+      elements.bottomNav.classList.remove("is-hidden");
+      elements.bottomNav.classList.add("is-at-page-bottom");
+      return;
+    }
+
+    elements.bottomNav.classList.remove("is-at-page-bottom");
+    elements.bottomNav.classList.add("is-hidden");
+  };
+
+  window.setTimeout(updateBottomNav, 2000);
+  window.addEventListener("scroll", updateBottomNav, { passive: true });
+  window.addEventListener("resize", updateBottomNav);
 }
 
 function setupDropzone() {
