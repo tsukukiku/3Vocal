@@ -11,11 +11,16 @@
   stageSequence: [],
   stagePointer: 0,
   stageTimer: null,
-  stageVisibleSlot: 0
+  stageVisibleSlot: 0,
+  templateScrollTimer: null,
+  templateAutoScrollFrame: null,
+  templateScrollPausedUntil: 0,
+  templateLastAutoScrollTime: 0
 };
 
 const elements = {
   startSynthesisBtn: document.getElementById("startSynthesisBtn"),
+  workSynthesisBtn: document.getElementById("workSynthesisBtn"),
   uploadBtn: document.getElementById("uploadBtn"),
   recordBtn: document.getElementById("recordBtn"),
   audioFileInput: document.getElementById("audioFileInput"),
@@ -29,6 +34,9 @@ const elements = {
   seekBar: document.getElementById("seekBar"),
   currentTime: document.getElementById("currentTime"),
   duration: document.getElementById("duration"),
+  volumeBtn: document.getElementById("volumeBtn"),
+  fullscreenBtn: document.getElementById("fullscreenBtn"),
+  preview: document.querySelector(".preview"),
   downloadBtn: document.getElementById("downloadBtn"),
   shareBtn: document.getElementById("shareBtn"),
   genderBtns: document.querySelectorAll(".gender-btn"),
@@ -40,7 +48,15 @@ const elements = {
   worksMusical: document.getElementById("worksMusical"),
   worksEnglish: document.getElementById("worksEnglish"),
   worksChinese: document.getElementById("worksChinese"),
-  worksLive: document.getElementById("worksLive")
+  worksLive: document.getElementById("worksLive"),
+  templateMusicalList: document.getElementById("templateMusicalList"),
+  templateEnglishList: document.getElementById("templateEnglishList"),
+  templateChineseList: document.getElementById("templateChineseList"),
+  templateAiList: document.getElementById("templateAiList"),
+  templateGrid: document.querySelector(".template-grid"),
+  templatePanel: document.getElementById("templatePanel"),
+  toggleTemplatesBtn: document.getElementById("toggleTemplatesBtn"),
+  navItems: document.querySelectorAll(".nav-item")
 };
 
 const clipToneMap = {
@@ -48,7 +64,8 @@ const clipToneMap = {
   shape: 392,
   sea: 330,
   reason: 349,
-  piano: 294
+  piano: 294,
+  ai: 523
 };
 
 const ICONS = {
@@ -58,21 +75,21 @@ const ICONS = {
 };
 
 const STAGE_SLIDES = {
-  female: Array.from({ length: 9 }, (_, i) => `./assets/slides/female/female-${i + 1}.png`),
-  male: Array.from({ length: 9 }, (_, i) => `./assets/slides/male/male-${i + 1}.png`)
+  female: Array.from({ length: 9 }, (_, i) => `./assets/slides-optimized/female/female-${i + 1}.jpg`),
+  male: Array.from({ length: 9 }, (_, i) => `./assets/slides-optimized/male/male-${i + 1}.jpg`)
 };
 
 const DISPLAY_NAME_BY_ID = {
   1: "Shape of You（J.Fla Cover）",
   2: "Shape of You（Ed Sheeran）",
   3: "Hamilton - Satisfied",
-  4: "张雨生 - 大海",
-  5: "张雨生 - 大海（版本二）",
-  6: "张学友 - 一千个伤心的理由",
+  4: "王俊余乐 - 千纸鹤",
+  5: "王杰 - 回家",
+  6: "王杰 - 是否我真的一无所有",
   7: "张学友 - 等你等到我心痛",
   8: "姜育恒 - 再回首",
-  9: "张雨生 - 大海（版本三）",
-  10: "张学友 - 一千个伤心的理由（版本二）",
+  9: "张雨生 - 大海",
+  10: "张学友 - 一千个伤心的理由",
   11: "车继铃 - 最远的你是我最近的爱",
   12: "费翔 - 冬天里的一把火",
   13: "林忆莲 - 爱上一个不回家的人",
@@ -85,7 +102,10 @@ const DISPLAY_NAME_BY_ID = {
   20: "Michael Jackson - Billie Jean",
   21: "Vitas - Opera #2",
   22: "Phantom of the Opera - Popular Songs",
-  23: "The Righteous Brothers - Unchained Melody"
+  23: "The Righteous Brothers - Unchained Melody",
+  24: "Celine Dion - My Heart Will Go On",
+  25: "Whitney Houston - I Will Always Love You",
+  26: "George Michael - Careless Whisper"
 };
 
 const URL_BY_ID = {
@@ -111,7 +131,10 @@ const URL_BY_ID = {
   20: "https://www.youtube.com/watch?v=Zi_XLOBDo_Y",
   21: "https://www.youtube.com/watch?v=8-qZD6XHVCA",
   22: "https://www.youtube.com/watch?v=_IJ-Dqm9E-8",
-  23: "https://www.youtube.com/watch?v=Zv8czIoAw5w"
+  23: "https://www.youtube.com/watch?v=Zv8czIoAw5w",
+  24: "https://www.youtube.com/watch?v=F2RnxZnubCM",
+  25: "https://www.youtube.com/watch?v=3JWTaaS7LdU",
+  26: "https://youtu.be/izGwDsrQ1eQ"
 };
 
 init();
@@ -119,12 +142,13 @@ init();
 function init() {
   bindEvents();
   setupResultPlayer();
+  setupTemplateLoopScroll();
   startStageSlideshow("female");
   loadWorksLibrary();
 }
 
 function bindEvents() {
-  elements.uploadBtn.addEventListener("click", () => elements.audioFileInput.click());
+  elements.uploadBtn?.addEventListener("click", () => elements.audioFileInput.click());
 
   elements.audioFileInput.addEventListener("change", (event) => {
     const file = event.target.files?.[0];
@@ -135,9 +159,13 @@ function bindEvents() {
   setupDropzone();
 
   elements.recordBtn.addEventListener("click", toggleRecording);
-  elements.startSynthesisBtn.addEventListener("click", startSynthesisFlow);
+  elements.startSynthesisBtn?.addEventListener("click", startSynthesisFlow);
+  elements.workSynthesisBtn?.addEventListener("click", startSynthesisFlow);
+  elements.toggleTemplatesBtn?.addEventListener("click", toggleTemplatePanel);
   elements.playResultBtn.addEventListener("click", toggleResultPlayback);
   elements.seekBar.addEventListener("input", seekResultAudio);
+  elements.volumeBtn?.addEventListener("click", toggleVolume);
+  elements.fullscreenBtn?.addEventListener("click", toggleFullscreen);
   elements.shareBtn.addEventListener("click", shareResult);
 
   document.querySelectorAll(".play-clip-btn,.mini-play-btn").forEach((button) => {
@@ -154,6 +182,67 @@ function bindEvents() {
       startStageSlideshow(gender);
     });
   });
+
+  elements.navItems.forEach((button) => {
+    button.addEventListener("click", () => {
+      elements.navItems.forEach((item) => item.classList.remove("active"));
+      button.classList.add("active");
+    });
+  });
+}
+
+function toggleTemplatePanel() {
+  if (!elements.templatePanel || !elements.toggleTemplatesBtn) return;
+
+  const expanded = elements.templatePanel.classList.toggle("is-expanded");
+  elements.toggleTemplatesBtn.textContent = expanded ? "收起" : "查看更多";
+  elements.toggleTemplatesBtn.setAttribute("aria-expanded", String(expanded));
+}
+
+function setupTemplateLoopScroll() {
+  if (!elements.templateGrid) return;
+
+  const pauseAutoScroll = (duration = 1800) => {
+    state.templateScrollPausedUntil = performance.now() + duration;
+  };
+
+  elements.templateGrid.addEventListener("scroll", () => {
+    if (elements.templatePanel?.classList.contains("is-expanded")) return;
+
+    window.clearTimeout(state.templateScrollTimer);
+    state.templateScrollTimer = window.setTimeout(() => {
+      const maxScroll = elements.templateGrid.scrollWidth - elements.templateGrid.clientWidth;
+      if (maxScroll < 24) return;
+
+      if (elements.templateGrid.scrollLeft >= maxScroll - 2) {
+        elements.templateGrid.scrollTo({ left: 0, behavior: "smooth" });
+      }
+    }, 260);
+  }, { passive: true });
+
+  ["pointerdown", "touchstart", "wheel"].forEach((eventName) => {
+    elements.templateGrid.addEventListener(eventName, () => pauseAutoScroll(2400), { passive: true });
+  });
+
+  const tick = (now) => {
+    const grid = elements.templateGrid;
+    const maxScroll = grid.scrollWidth - grid.clientWidth;
+    const expanded = elements.templatePanel?.classList.contains("is-expanded");
+
+    if (!state.templateLastAutoScrollTime) state.templateLastAutoScrollTime = now;
+    const elapsed = now - state.templateLastAutoScrollTime;
+    state.templateLastAutoScrollTime = now;
+
+    if (!expanded && maxScroll > 24 && now > state.templateScrollPausedUntil) {
+      const speed = 0.028;
+      const nextLeft = grid.scrollLeft + elapsed * speed;
+      grid.scrollLeft = nextLeft >= maxScroll - 1 ? 0 : nextLeft;
+    }
+
+    state.templateAutoScrollFrame = window.requestAnimationFrame(tick);
+  };
+
+  state.templateAutoScrollFrame = window.requestAnimationFrame(tick);
 }
 
 function setupDropzone() {
@@ -242,6 +331,12 @@ function playClipTone(clipName) {
 async function startSynthesisFlow() {
   if (!state.selectedFile) {
     alert("请先上传声音文件或完成录音。");
+    return;
+  }
+
+  if (elements.accessTokenInput.value.trim() !== "3VOCAL") {
+    alert("请输入口令 3VOCAL 后再执行合成。");
+    elements.accessTokenInput.focus();
     return;
   }
 
@@ -346,6 +441,37 @@ function seekResultAudio() {
   elements.resultAudio.currentTime = (Number(elements.seekBar.value) / 100) * duration;
 }
 
+function toggleVolume() {
+  elements.resultAudio.muted = !elements.resultAudio.muted;
+  elements.volumeBtn.classList.toggle("is-muted", elements.resultAudio.muted);
+  elements.volumeBtn.setAttribute("aria-label", elements.resultAudio.muted ? "取消静音" : "静音");
+}
+
+async function toggleFullscreen() {
+  const target = elements.preview || document.documentElement;
+
+  try {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+      return;
+    }
+
+    if (target.requestFullscreen) {
+      await target.requestFullscreen();
+      return;
+    }
+
+    if (target.webkitRequestFullscreen) {
+      target.webkitRequestFullscreen();
+      return;
+    }
+
+    alert("当前浏览器不支持网页全屏。");
+  } catch (error) {
+    alert("全屏启动失败，请再点一次或检查浏览器权限。");
+  }
+}
+
 async function shareResult() {
   if (!state.resultUrl) {
     alert("请先完成合成，再分享作品。");
@@ -394,8 +520,13 @@ function startStageSlideshow(gender) {
     btn.classList.toggle("active", btn.dataset.gender === gender);
   });
 
-  elements.stagePreviewTitle.textContent = gender === "female" ? "女歌手舞台预览" : "男歌手舞台预览";
-  elements.stagePreviewHint.textContent = "图片随机乱序轮播";
+  if (elements.stagePreviewTitle) {
+    elements.stagePreviewTitle.textContent = gender === "female" ? "女歌手舞台预览" : "男歌手舞台预览";
+  }
+
+  if (elements.stagePreviewHint) {
+    elements.stagePreviewHint.textContent = "图片随机乱序轮播";
+  }
 
   state.stageTimer = setInterval(nextStageSlide, 2800);
 }
@@ -421,15 +552,28 @@ function nextStageSlide() {
 }
 
 async function loadWorksLibrary() {
+  let works = [];
+  let aiSongs = Array.isArray(window.AI_SONGS) ? window.AI_SONGS : [];
+
   try {
     const resp = await fetch("./assets/data/youtube_links_all_files.txt");
     const text = await resp.text();
 
-    const works = parseWorksText(text);
-    renderWorksLibrary(works);
+    works = parseWorksText(text);
   } catch (error) {
-    renderWorksLibrary(getFallbackWorks());
+    works = getFallbackWorks();
   }
+
+  try {
+    const resp = await fetch("./assets/data/ai_songs.json");
+    const fetchedAiSongs = await resp.json();
+    if (Array.isArray(fetchedAiSongs)) aiSongs = fetchedAiSongs;
+  } catch (error) {
+    // AI song data is optional so the page still works if the local list is absent.
+  }
+
+  works = works.concat(aiSongs);
+  renderWorksLibrary(works);
 }
 
 function renderWorksLibrary(works) {
@@ -438,7 +582,12 @@ function renderWorksLibrary(works) {
   renderWorksList(elements.worksMusical, grouped.musical);
   renderWorksList(elements.worksEnglish, grouped.english);
   renderWorksList(elements.worksChinese, grouped.chinese);
-  renderWorksList(elements.worksLive, grouped.live);
+  renderWorksList(elements.worksLive, grouped.ai);
+
+  renderTemplateWorksList(elements.templateMusicalList, grouped.musical, "musical");
+  renderTemplateWorksList(elements.templateEnglishList, grouped.english, "english");
+  renderTemplateWorksList(elements.templateChineseList, grouped.chinese, "chinese");
+  renderTemplateWorksList(elements.templateAiList, grouped.ai, "ai");
 
   elements.worksMeta.textContent = `共 ${works.length} 条作品链接`;
 }
@@ -539,22 +688,23 @@ function groupWorks(works) {
     musical: [],
     english: [],
     chinese: [],
-    live: []
+    ai: []
   };
 
   for (const work of works) {
     const text = `${work.display} ${work.file}`.toLowerCase();
 
-    if (work.section === "mp4") {
-      grouped.live.push(work);
+    if (work.section === "ai") {
+      grouped.ai.push(work);
+      continue;
     }
 
-    if (/hamilton|musical|phantom|cats|traviata|memory|satisfied|libiamo/.test(text)) {
+    if (/hamilton|musical|phantom|cats|traviata|memory|satisfied|libiamo|pavarot+i|vitas|opera|nessun/.test(text)) {
       grouped.musical.push(work);
       continue;
     }
 
-    if (/ed sheeran|shape of you|elvis|michael jackson|pavarotti|vitas|opera|unchained|j\.fla|billie/.test(text)) {
+    if (/ed sheeran|shape of you|elvis|michael jackson|unchained|j\.fla|billie|celine dion|titanic|heart will go on|whitney houston|always love you|george michael|careless whisper/.test(text)) {
       grouped.english.push(work);
       continue;
     }
@@ -565,7 +715,7 @@ function groupWorks(works) {
   grouped.musical = uniqueByUrl(grouped.musical);
   grouped.english = uniqueByUrl(grouped.english);
   grouped.chinese = uniqueByUrl(grouped.chinese);
-  grouped.live = uniqueByUrl(grouped.live);
+  grouped.ai = uniqueByUrl(grouped.ai);
 
   return grouped;
 }
@@ -602,6 +752,82 @@ function renderWorksList(container, list) {
     li.textContent = "暂无作品";
     container.appendChild(li);
   }
+}
+
+function renderTemplateWorksList(container, list, groupName) {
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  const visibleList = list.filter((work) => !isTemplateDuplicateLead(work, groupName));
+
+  visibleList.forEach((work) => {
+    const displayTitle = getTemplateDisplayTitle(work, groupName);
+    const li = document.createElement("li");
+    li.className = "template-work-item";
+
+    const a = document.createElement("a");
+    a.href = work.url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.textContent = displayTitle;
+    a.title = displayTitle;
+
+    li.appendChild(a);
+    container.appendChild(li);
+  });
+
+  if (!visibleList.length) {
+    const li = document.createElement("li");
+    li.className = "template-work-item empty";
+    li.textContent = "暂无作品";
+    container.appendChild(li);
+  }
+}
+
+function getTemplateDisplayTitle(work, groupName) {
+  if (groupName !== "ai") return work.display;
+
+  const title = cleanAiSongTitle(work);
+  const pixabayId = work.pixabayId || extractPixabayId(work);
+
+  return pixabayId ? `${title} #${pixabayId}` : title;
+}
+
+function cleanAiSongTitle(work) {
+  if (work.title) return work.title.trim();
+
+  const display = String(work.display || work.file || "")
+    .replace(/\.(mp3|wav|m4a|aac|flac|ogg)$/i, "")
+    .trim();
+
+  const hashMatch = display.match(/#?\s*(\d{4,})\s*$/);
+  const withoutId = hashMatch ? display.slice(0, hashMatch.index).trim() : display;
+  const dashParts = withoutId.split(/\s+-\s+|-/).map((part) => part.trim()).filter(Boolean);
+
+  return dashParts.length > 1 ? dashParts.slice(1).join(" - ") : withoutId;
+}
+
+function extractPixabayId(work) {
+  const source = `${work.display || ""} ${work.file || ""} ${work.url || ""}`;
+  const hashMatch = source.match(/#\s*(\d{4,})/);
+  if (hashMatch) return hashMatch[1];
+
+  const fileIdMatch = source.match(/(?:-|\/)(\d{4,})(?:\.(?:mp3|wav|m4a|aac|flac|ogg)|\b)/i);
+  return fileIdMatch ? fileIdMatch[1] : "";
+}
+
+function isTemplateDuplicateLead(work, groupName) {
+  const text = `${work.display || ""} ${work.file || ""}`.toLowerCase();
+
+  const duplicateRules = {
+    musical: /hamilton\s*-\s*satisfied|satisfied\s+from\s+hamilton/,
+    english: /ed\s*sheeran\s*-\s*shape\s*of\s*you|shape\s*of\s*you\s*\(ed\s*sheeran\)/,
+    chinese: /$a/,
+    ai: /星光练习曲|原创伴奏/
+  };
+
+  return duplicateRules[groupName]?.test(text) ?? false;
 }
 
 function shuffleArray(list) {
