@@ -578,6 +578,9 @@ async function loadWorksLibrary() {
 
 function renderWorksLibrary(works) {
   const grouped = groupWorks(works);
+  if (!grouped.ai.length && Array.isArray(window.AI_SONGS)) {
+    grouped.ai = uniqueByUrl(window.AI_SONGS);
+  }
 
   renderWorksList(elements.worksMusical, grouped.musical);
   renderWorksList(elements.worksEnglish, grouped.english);

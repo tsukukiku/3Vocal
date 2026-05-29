@@ -333,7 +333,13 @@ body::-webkit-scrollbar-thumb:hover {
 .h2-icon {
   width: 17px;
   height: 17px;
+  object-fit: contain;
   opacity: 0.92;
+}
+
+.stage-symbol {
+  border-radius: 4px;
+  filter: brightness(1.18) contrast(1.08) drop-shadow(0 0 6px rgba(255, 218, 150, 0.28));
 }
 
 .panel-head {
@@ -372,6 +378,7 @@ body::-webkit-scrollbar-thumb:hover {
   border: 1px solid rgba(255, 255, 255, 0.14);
   position: relative;
   overflow: hidden;
+  min-width: 0;
   flex: 0 0 calc((min(100vw, var(--shell-max)) - 58px) / 2.5);
   aspect-ratio: 1 / 1;
   height: auto;
@@ -428,7 +435,8 @@ body::-webkit-scrollbar-thumb:hover {
 }
 
 .template-card h3 {
-  margin: 0 0 6px;
+  min-width: 0;
+  margin: 0 0 4px;
   font-family: var(--font-title);
   font-size: 14px;
   line-height: 1.1;
@@ -477,11 +485,12 @@ body::-webkit-scrollbar-thumb:hover {
 }
 
 .template-card ul {
+  min-width: 0;
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 4px;
+  gap: 2px;
 }
 
 .template-card.rose ul {
@@ -518,7 +527,7 @@ body::-webkit-scrollbar-thumb:hover {
 }
 
 .template-song-list {
-  max-height: calc(100% - 28px);
+  max-height: calc(100% - 22px);
   overflow: hidden;
   padding-right: 2px;
 }
@@ -528,7 +537,7 @@ body::-webkit-scrollbar-thumb:hover {
   min-width: 0;
   grid-template-columns: none;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  padding: 0 0 3px;
+  padding: 0 0 2px;
   overflow: hidden;
 }
 
@@ -537,8 +546,8 @@ body::-webkit-scrollbar-thumb:hover {
   display: block;
   width: 100%;
   color: #f9efff;
-  font-size: 10px;
-  line-height: 1.42;
+  font-size: 9.5px;
+  line-height: 1.24;
   text-decoration: none;
   white-space: nowrap;
   overflow: hidden;
