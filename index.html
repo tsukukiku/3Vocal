@@ -16,7 +16,7 @@
         </div>
         <div class="hero-copy">
           <h1><span>上传你的声音，</span><span>唱出你的舞台</span></h1>
-          <p class="hero-subtitle"><span>   AI合成声音，</span><span>助您唱响世界名曲</span></p>
+          <p class="hero-subtitle">用你的声音，演绎世界名曲。</p>
         </div>
       </section>
 
@@ -27,7 +27,7 @@
         </div>
         <div class="template-grid">
           <article class="template-card warm" data-clip="hamilton">
-            <h3>歌舞剧</h3>
+            <h3>歌剧 音乐剧</h3>
             <ul class="template-song-list" id="templateMusicalList"></ul>
           </article>
 
@@ -42,7 +42,7 @@
           </article>
 
           <article class="template-card ai" data-clip="ai">
-            <h3>AI无版权新曲</h3>
+            <h3>AI新曲</h3>
             <ul class="template-song-list" id="templateAiList"></ul>
           </article>
         </div>
@@ -50,12 +50,12 @@
 
       <section class="panel glass works-panel">
         <div class="panel-head">
-          <h2>作品链接库</h2>
-          <span class="works-meta" id="worksMeta">正在加载...</span>
+          <h2>作品链接库 <span class="works-meta" id="worksMeta">正在加载...</span></h2>
+          <button class="link-btn" id="toggleWorksBtn" type="button" aria-expanded="false">查看更多</button>
         </div>
         <div class="works-grid">
           <article class="works-card">
-            <h3>歌舞剧</h3>
+            <h3>歌剧 音乐剧</h3>
             <ul id="worksMusical"></ul>
           </article>
           <article class="works-card">
@@ -103,10 +103,12 @@
         </div>
       </section>
 
-      <section class="panel glass">
+      <section class="panel glass" id="stagePlayer">
         <div class="panel-head">
           <h2><img class="h2-icon stage-symbol" src="./assets/icons/icon-stage.png" alt="">舞台效果</h2>
           <div class="stage-toolbar" role="group" aria-label="舞台效果类型">
+            <button class="play-mode-btn active" type="button" data-mode="sequence">顺序</button>
+            <button class="play-mode-btn" type="button" data-mode="shuffle">随机</button>
             <button class="gender-btn active" type="button" data-gender="female">女歌手</button>
             <button class="gender-btn" type="button" data-gender="male">男歌手</button>
           </div>
@@ -124,7 +126,7 @@
             <button id="volumeBtn" class="icon-btn" type="button" aria-label="音量"><img src="./assets/icons/icon-volume.png" alt=""></button>
             <button id="fullscreenBtn" class="icon-btn" type="button" aria-label="全屏"><img src="./assets/icons/icon-fullscreen.png" alt=""></button>
           </div>
-          <audio id="resultAudio" preload="metadata"></audio>
+          <audio id="resultAudio" preload="metadata" controlsList="nodownload" oncontextmenu="return false"></audio>
         </div>
         <div class="result-actions">
           <a id="downloadBtn" class="action-btn secondary" href="#" download="karaoke-result.mp3"><img class="download-icon" src="./assets/icons/icon-upload.png" alt="">下载音频</a>
@@ -140,7 +142,11 @@
       <button class="nav-item" type="button"><img src="./assets/icons/icon-nav-user.png" alt=""><span>我的</span></button>
     </nav>
   </div>
+  <div class="now-playing-caption" id="nowPlayingCaption" aria-live="polite"></div>
 
+  <script>
+    window.AI_STREAM_BASE_URL = "";
+  </script>
   <script src="./assets/data/ai_songs.js"></script>
   <script src="./app.js"></script>
 </body>

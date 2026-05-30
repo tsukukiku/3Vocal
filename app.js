@@ -15,7 +15,14 @@
   templateScrollTimer: null,
   templateAutoScrollFrame: null,
   templateScrollPausedUntil: 0,
-  templateLastAutoScrollTime: 0
+  templateLastAutoScrollTime: 0,
+  templateAutoDistance: 0,
+  templateAutoTravelled: 0,
+  templateAutoStopped: false,
+  aiPlaylist: [],
+  aiPlaylistIndex: -1,
+  aiPlayMode: "sequence",
+  activeStreamWork: null
 };
 
 const elements = {
@@ -39,12 +46,17 @@ const elements = {
   preview: document.querySelector(".preview"),
   downloadBtn: document.getElementById("downloadBtn"),
   shareBtn: document.getElementById("shareBtn"),
+  resultActions: document.querySelector(".result-actions"),
   genderBtns: document.querySelectorAll(".gender-btn"),
+  playModeBtns: document.querySelectorAll(".play-mode-btn"),
   stageSlideA: document.getElementById("stageSlideA"),
   stageSlideB: document.getElementById("stageSlideB"),
   stagePreviewTitle: document.getElementById("stagePreviewTitle"),
   stagePreviewHint: document.getElementById("stagePreviewHint"),
   worksMeta: document.getElementById("worksMeta"),
+  worksPanel: document.querySelector(".works-panel"),
+  worksGrid: document.querySelector(".works-grid"),
+  toggleWorksBtn: document.getElementById("toggleWorksBtn"),
   worksMusical: document.getElementById("worksMusical"),
   worksEnglish: document.getElementById("worksEnglish"),
   worksChinese: document.getElementById("worksChinese"),
@@ -57,7 +69,8 @@ const elements = {
   templatePanel: document.getElementById("templatePanel"),
   toggleTemplatesBtn: document.getElementById("toggleTemplatesBtn"),
   navItems: document.querySelectorAll(".nav-item"),
-  bottomNav: document.querySelector(".bottom-nav")
+  bottomNav: document.querySelector(".bottom-nav"),
+  nowPlayingCaption: document.getElementById("nowPlayingCaption")
 };
 
 const clipToneMap = {
@@ -74,6 +87,8 @@ const ICONS = {
   pause: "./assets/icons/icon-pause.png",
   mic: "./assets/icons/icon-mic.png"
 };
+
+const AI_STREAM_BASE_URL = window.AI_STREAM_BASE_URL || "";
 
 const STAGE_SLIDES = {
   female: Array.from({ length: 9 }, (_, i) => `./assets/slides-optimized/female/female-${i + 1}.jpg`),
@@ -138,6 +153,156 @@ const URL_BY_ID = {
   26: "https://youtu.be/izGwDsrQ1eQ"
 };
 
+const CURATED_MUSICAL_WORKS = [
+  {
+    id: "musical-satisfied",
+    display: "Satisfied 《汉密尔顿》",
+    title: "Satisfied 《汉密尔顿》",
+    file: "Satisfied Hamilton",
+    url: "https://www.youtube.com/watch?v=InupuylYdcY",
+    section: "musical"
+  },
+  {
+    id: "musical-opera-2",
+    display: "Opera #2 维塔斯",
+    title: "Opera #2 维塔斯",
+    file: "Opera #2 Vitas",
+    url: "https://www.youtube.com/watch?v=8-qZD6XHVCA",
+    section: "musical"
+  },
+  {
+    id: "musical-queen-night",
+    display: "Queen of the Night Aria 夜后咏叹调 莫扎特《魔笛》",
+    title: "Queen of the Night Aria 夜后咏叹调 莫扎特《魔笛》",
+    file: "Queen of the Night Aria",
+    url: "https://youtu.be/YuBeBjqKSGQ",
+    section: "musical"
+  },
+  {
+    id: "musical-phantom",
+    display: "The Phantom of the Opera 《歌剧魅影》",
+    title: "The Phantom of the Opera 《歌剧魅影》",
+    file: "The Phantom of the Opera",
+    url: "https://www.youtube.com/watch?v=_IJ-Dqm9E-8",
+    section: "musical"
+  },
+  {
+    id: "musical-libiamo",
+    display: "Libiamo ne' lieti calici 饮酒歌 威尔第《茶花女》",
+    title: "Libiamo ne' lieti calici 饮酒歌 威尔第《茶花女》",
+    file: "Libiamo ne lieti calici",
+    url: "https://www.youtube.com/watch?v=l7eHO_PEWLk",
+    section: "musical"
+  },
+  {
+    id: "musical-nessun-dorma",
+    display: "Nessun dorma 今夜无人入睡 普契尼《图兰朵》",
+    title: "Nessun dorma 今夜无人入睡 普契尼《图兰朵》",
+    file: "Nessun dorma",
+    url: "https://www.youtube.com/watch?v=8uqPnY5hQDs",
+    section: "musical"
+  },
+  {
+    id: "musical-sempre-libera",
+    display: "Sempre libera 永远自由 威尔第《茶花女》",
+    title: "Sempre libera 永远自由 威尔第《茶花女》",
+    file: "Sempre libera",
+    url: "https://www.youtube.com/watch?v=IGlugsYQZgg",
+    section: "musical"
+  },
+  {
+    id: "musical-let-it-go",
+    display: "Let It Go 《冰雪奇缘》",
+    title: "Let It Go 《冰雪奇缘》",
+    file: "Let It Go Frozen",
+    url: "https://www.youtube.com/watch?v=L0MK7qz13bU",
+    section: "musical"
+  },
+  {
+    id: "musical-memory",
+    display: "Memory 《猫》",
+    title: "Memory 《猫》",
+    file: "Memory Cats",
+    url: "https://www.youtube.com/watch?v=mdBVJbzkoqo",
+    section: "musical"
+  },
+  {
+    id: "musical-toreador",
+    display: "Toreador Song 斗牛士之歌 比才《卡门》",
+    title: "Toreador Song 斗牛士之歌 比才《卡门》",
+    file: "Toreador Song",
+    url: "https://www.youtube.com/watch?v=e5qmSEvDEGs",
+    section: "musical"
+  }
+];
+
+const CURATED_ENGLISH_WORKS = [
+  {
+    id: "english-billie-jean",
+    display: "Billie Jean（迈克尔・杰克逊）",
+    title: "Billie Jean（迈克尔・杰克逊）",
+    file: "Billie Jean Michael Jackson",
+    url: "https://www.youtube.com/watch?v=Zi_XLOBDo_Y",
+    section: "english"
+  },
+  {
+    id: "english-shape-jfla",
+    display: "Shape of You (J.Fla翻唱)",
+    title: "Shape of You (J.Fla翻唱)",
+    file: "Shape of You J.Fla Cover",
+    url: "https://www.youtube.com/watch?v=MhQKe-aERsU",
+    section: "english"
+  },
+  {
+    id: "english-shape-ed",
+    display: "Shape of You（艾德・西兰 红发艾德）",
+    title: "Shape of You（艾德・西兰 红发艾德）",
+    file: "Shape of You Ed Sheeran",
+    url: "https://www.youtube.com/watch?v=JGwWNGJdvx8",
+    section: "english"
+  },
+  {
+    id: "english-cant-help",
+    display: "Can't Help Falling In Love（埃尔维斯・普雷斯利 猫王）",
+    title: "Can't Help Falling In Love（埃尔维斯・普雷斯利 猫王）",
+    file: "Can't Help Falling In Love Elvis Presley",
+    url: "https://www.youtube.com/watch?v=vGJTaP6anOU",
+    section: "english"
+  },
+  {
+    id: "english-unchained-melody",
+    display: "Unchained Melody Remastered（正义兄弟）",
+    title: "Unchained Melody Remastered（正义兄弟）",
+    file: "Unchained Melody Remastered The Righteous Brothers",
+    url: "https://www.youtube.com/watch?v=Zv8czIoAw5w",
+    section: "english"
+  },
+  {
+    id: "english-heart-will-go-on",
+    display: "My Heart Will Go On（席琳・迪翁）",
+    title: "My Heart Will Go On（席琳・迪翁）",
+    file: "My Heart Will Go On Celine Dion",
+    url: "https://www.youtube.com/watch?v=F2RnxZnubCM",
+    section: "english"
+  },
+  {
+    id: "english-careless-whisper",
+    display: "Careless Whisper（乔治・迈克尔）",
+    title: "Careless Whisper（乔治・迈克尔）",
+    file: "Careless Whisper George Michael",
+    url: "https://youtu.be/izGwDsrQ1eQ",
+    section: "english"
+  },
+  {
+    id: "english-always-love-you",
+    display: "I Will Always Love You（惠特尼・休斯顿）",
+    title: "I Will Always Love You（惠特尼・休斯顿）",
+    file: "I Will Always Love You Whitney Houston",
+    url: "https://www.youtube.com/watch?v=3JWTaaS7LdU",
+    section: "english"
+  }
+];
+
 init();
 
 function init() {
@@ -164,11 +329,14 @@ function bindEvents() {
   elements.startSynthesisBtn?.addEventListener("click", startSynthesisFlow);
   elements.workSynthesisBtn?.addEventListener("click", startSynthesisFlow);
   elements.toggleTemplatesBtn?.addEventListener("click", toggleTemplatePanel);
+  elements.toggleWorksBtn?.addEventListener("click", toggleWorksPanel);
+  elements.templateGrid?.addEventListener("click", handleTemplateGridClick);
   elements.playResultBtn.addEventListener("click", toggleResultPlayback);
   elements.seekBar.addEventListener("input", seekResultAudio);
   elements.volumeBtn?.addEventListener("click", toggleVolume);
   elements.fullscreenBtn?.addEventListener("click", toggleFullscreen);
   elements.shareBtn.addEventListener("click", shareResult);
+  elements.downloadBtn.addEventListener("click", blockUnavailableAction);
 
   document.querySelectorAll(".play-clip-btn,.mini-play-btn").forEach((button) => {
     button.addEventListener("click", () => {
@@ -185,12 +353,20 @@ function bindEvents() {
     });
   });
 
+  elements.playModeBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      setAiPlayMode(btn.dataset.mode);
+    });
+  });
+
   elements.navItems.forEach((button) => {
     button.addEventListener("click", () => {
       elements.navItems.forEach((item) => item.classList.remove("active"));
       button.classList.add("active");
     });
   });
+
+  window.addEventListener("resize", updateTemplateAutoMetrics);
 }
 
 function toggleTemplatePanel() {
@@ -199,6 +375,15 @@ function toggleTemplatePanel() {
   const expanded = elements.templatePanel.classList.toggle("is-expanded");
   elements.toggleTemplatesBtn.textContent = expanded ? "收起" : "查看更多";
   elements.toggleTemplatesBtn.setAttribute("aria-expanded", String(expanded));
+  if (!expanded) updateTemplateAutoMetrics();
+}
+
+function toggleWorksPanel() {
+  if (!elements.worksPanel || !elements.toggleWorksBtn) return;
+
+  const expanded = elements.worksPanel.classList.toggle("is-expanded");
+  elements.toggleWorksBtn.textContent = expanded ? "收起" : "查看更多";
+  elements.toggleWorksBtn.setAttribute("aria-expanded", String(expanded));
 }
 
 function setupTemplateLoopScroll() {
@@ -213,12 +398,10 @@ function setupTemplateLoopScroll() {
 
     window.clearTimeout(state.templateScrollTimer);
     state.templateScrollTimer = window.setTimeout(() => {
-      const maxScroll = elements.templateGrid.scrollWidth - elements.templateGrid.clientWidth;
-      if (maxScroll < 24) return;
+    const maxScroll = elements.templateGrid.scrollWidth - elements.templateGrid.clientWidth;
+    if (maxScroll < 24) return;
 
-      if (elements.templateGrid.scrollLeft >= maxScroll - 2) {
-        elements.templateGrid.scrollTo({ left: 0, behavior: "smooth" });
-      }
+      if (elements.templateGrid.scrollLeft >= maxScroll - 2) elements.templateGrid.scrollLeft = maxScroll;
     }, 260);
   }, { passive: true });
 
@@ -235,16 +418,34 @@ function setupTemplateLoopScroll() {
     const elapsed = now - state.templateLastAutoScrollTime;
     state.templateLastAutoScrollTime = now;
 
-    if (!expanded && maxScroll > 24 && now > state.templateScrollPausedUntil) {
-      const speed = 0.028;
-      const nextLeft = grid.scrollLeft + elapsed * speed;
-      grid.scrollLeft = nextLeft >= maxScroll - 1 ? 0 : nextLeft;
+    if (!expanded && !state.templateAutoStopped && maxScroll > 24 && now > state.templateScrollPausedUntil) {
+      const speed = 0.034;
+      const distance = elapsed * speed;
+      state.templateAutoTravelled += distance;
+
+      if (state.templateAutoTravelled >= state.templateAutoDistance) {
+        grid.scrollLeft = maxScroll;
+        state.templateAutoStopped = true;
+      } else {
+        grid.scrollLeft += distance;
+        if (grid.scrollLeft >= maxScroll) grid.scrollLeft = 0;
+      }
     }
 
     state.templateAutoScrollFrame = window.requestAnimationFrame(tick);
   };
 
   state.templateAutoScrollFrame = window.requestAnimationFrame(tick);
+}
+
+function updateTemplateAutoMetrics() {
+  if (!elements.templateGrid) return;
+
+  const maxScroll = elements.templateGrid.scrollWidth - elements.templateGrid.clientWidth;
+  state.templateAutoDistance = Math.max(0, maxScroll * 2);
+  state.templateAutoTravelled = 0;
+  state.templateAutoStopped = false;
+  elements.templateGrid.scrollLeft = 0;
 }
 
 function setupBottomNavAutoHide() {
@@ -369,6 +570,7 @@ async function startSynthesisFlow() {
   clearProgressTimer();
   setProgress(0);
   document.body.classList.add("is-running");
+  setPlayModeButtonsEnabled(false);
 
   try {
     state.currentTaskId = `mock-${Date.now()}`;
@@ -382,6 +584,7 @@ async function startSynthesisFlow() {
     alert(`合成失败：${error.message}`);
   } finally {
     document.body.classList.remove("is-running");
+    setPlayModeButtonsEnabled(true);
     clearProgressTimer();
   }
 }
@@ -420,10 +623,11 @@ function clearProgressTimer() {
 function attachResult(audioUrl) {
   if (state.resultUrl?.startsWith("blob:")) URL.revokeObjectURL(state.resultUrl);
 
+  state.activeStreamWork = null;
+  setNowPlayingCaption("");
   state.resultUrl = audioUrl;
   elements.resultAudio.src = audioUrl;
-  elements.downloadBtn.href = audioUrl;
-  elements.downloadBtn.setAttribute("download", `karaoke-${Date.now()}.mp3`);
+  setDownloadEnabled(audioUrl);
 }
 
 function setupResultPlayer() {
@@ -440,6 +644,11 @@ function setupResultPlayer() {
   });
 
   elements.resultAudio.addEventListener("ended", () => {
+    if (state.activeStreamWork && state.aiPlaylist.length) {
+      playNextAiTrack();
+      return;
+    }
+
     elements.playResultBtn.innerHTML = `<img src="${ICONS.play}" alt="">`;
     elements.seekBar.value = "0";
   });
@@ -458,6 +667,121 @@ function toggleResultPlayback() {
     elements.resultAudio.pause();
     elements.playResultBtn.innerHTML = `<img src="${ICONS.play}" alt="">`;
   }
+}
+
+function setDownloadEnabled(audioUrl) {
+  elements.resultActions?.classList.remove("is-streaming");
+  elements.downloadBtn.classList.remove("is-unavailable");
+  elements.shareBtn.classList.remove("is-unavailable");
+  elements.shareBtn.disabled = false;
+  elements.downloadBtn.href = audioUrl;
+  elements.downloadBtn.setAttribute("download", `karaoke-${Date.now()}.mp3`);
+  elements.downloadBtn.removeAttribute("aria-disabled");
+}
+
+function setDownloadDisabled() {
+  elements.resultActions?.classList.add("is-streaming");
+  elements.downloadBtn.classList.add("is-unavailable");
+  elements.shareBtn.classList.add("is-unavailable");
+  elements.shareBtn.disabled = true;
+  elements.downloadBtn.removeAttribute("href");
+  elements.downloadBtn.removeAttribute("download");
+  elements.downloadBtn.setAttribute("aria-disabled", "true");
+}
+
+function blockUnavailableAction(event) {
+  if (!event.currentTarget.classList.contains("is-unavailable")) return;
+
+  event.preventDefault();
+}
+
+function setPlayModeButtonsEnabled(enabled) {
+  elements.playModeBtns.forEach((btn) => {
+    btn.disabled = !enabled;
+    btn.classList.toggle("is-unavailable", !enabled);
+  });
+}
+
+function setAiPlayMode(mode) {
+  state.aiPlayMode = mode === "shuffle" ? "shuffle" : "sequence";
+  elements.playModeBtns.forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.mode === state.aiPlayMode);
+  });
+}
+
+function getAiTrackKey(work) {
+  return String(work.id || work.file || work.url || work.localUrl || work.display || "");
+}
+
+function findAiPlaylistIndex(work) {
+  const key = getAiTrackKey(work);
+  return state.aiPlaylist.findIndex((item) => getAiTrackKey(item) === key);
+}
+
+function getAiStreamUrl(work) {
+  if (AI_STREAM_BASE_URL && work.file) {
+    const base = AI_STREAM_BASE_URL.replace(/\/+$/, "");
+    return `${base}/${encodeURIComponent(work.file)}`;
+  }
+
+  return work.streamUrl || work.localUrl || work.url || "";
+}
+
+async function playAiTrack(work, options = {}) {
+  const streamUrl = getAiStreamUrl(work);
+  if (!streamUrl) {
+    alert("这首 AI 新曲还没有配置可播放的 MP3 流地址。");
+    return;
+  }
+
+  const playlistIndex = findAiPlaylistIndex(work);
+  if (playlistIndex >= 0) state.aiPlaylistIndex = playlistIndex;
+
+  if (state.resultUrl?.startsWith("blob:")) URL.revokeObjectURL(state.resultUrl);
+  state.activeStreamWork = work;
+  state.resultUrl = streamUrl;
+  elements.resultAudio.src = streamUrl;
+  elements.resultAudio.load();
+  setNowPlayingCaption(getTemplateDisplayTitle(work, "ai"));
+  setDownloadDisabled();
+
+  if (options.scroll !== false) {
+    document.getElementById("stagePlayer")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  try {
+    await elements.resultAudio.play();
+    elements.playResultBtn.innerHTML = `<img src="${ICONS.pause}" alt="">`;
+  } catch (error) {
+    elements.playResultBtn.innerHTML = `<img src="${ICONS.play}" alt="">`;
+  }
+}
+
+function setNowPlayingCaption(text) {
+  if (!elements.nowPlayingCaption) return;
+
+  elements.nowPlayingCaption.textContent = text ? `正在播放：${text}` : "";
+  elements.nowPlayingCaption.classList.toggle("is-visible", Boolean(text));
+}
+
+function playNextAiTrack() {
+  if (!state.aiPlaylist.length) return;
+
+  let nextIndex = state.aiPlaylistIndex;
+
+  if (state.aiPlayMode === "shuffle") {
+    if (state.aiPlaylist.length === 1) {
+      nextIndex = 0;
+    } else {
+      while (nextIndex === state.aiPlaylistIndex) {
+        nextIndex = Math.floor(Math.random() * state.aiPlaylist.length);
+      }
+    }
+  } else {
+    nextIndex = (state.aiPlaylistIndex + 1) % state.aiPlaylist.length;
+  }
+
+  playAiTrack(state.aiPlaylist[nextIndex], { scroll: false });
 }
 
 function seekResultAudio() {
@@ -604,21 +928,27 @@ async function loadWorksLibrary() {
 
 function renderWorksLibrary(works) {
   const grouped = groupWorks(works);
+  grouped.musical = CURATED_MUSICAL_WORKS;
+  grouped.english = CURATED_ENGLISH_WORKS;
   if (!grouped.ai.length && Array.isArray(window.AI_SONGS)) {
     grouped.ai = uniqueByUrl(window.AI_SONGS);
   }
 
+  state.aiPlaylist = grouped.ai;
+  state.aiPlaylistIndex = grouped.ai.length ? 0 : -1;
+
   renderWorksList(elements.worksMusical, grouped.musical);
   renderWorksList(elements.worksEnglish, grouped.english);
   renderWorksList(elements.worksChinese, grouped.chinese);
-  renderWorksList(elements.worksLive, grouped.ai);
+  renderWorksList(elements.worksLive, grouped.ai, "ai");
 
   renderTemplateWorksList(elements.templateMusicalList, grouped.musical, "musical");
   renderTemplateWorksList(elements.templateEnglishList, grouped.english, "english");
   renderTemplateWorksList(elements.templateChineseList, grouped.chinese, "chinese");
   renderTemplateWorksList(elements.templateAiList, grouped.ai, "ai");
+  updateTemplateAutoMetrics();
 
-  elements.worksMeta.textContent = `共 ${works.length} 条作品链接`;
+  elements.worksMeta.textContent = `共 ${works.length} 条作品`;
 }
 
 function getFallbackWorks() {
@@ -728,7 +1058,7 @@ function groupWorks(works) {
       continue;
     }
 
-    if (/hamilton|musical|phantom|cats|traviata|memory|satisfied|libiamo|pavarot+i|vitas|opera|nessun/.test(text)) {
+    if (/hamilton|musical|phantom|cats|traviata|memory|satisfied|libiamo|pavarot+i|vitas|opera|nessun|mozart|queen of the night|magic flute|frozen|let it go|sempre libera|魔笛|茶花女|图兰朵|歌剧魅影|夜后|饮酒歌/.test(text)) {
       grouped.musical.push(work);
       continue;
     }
@@ -758,7 +1088,7 @@ function uniqueByUrl(list) {
   });
 }
 
-function renderWorksList(container, list) {
+function renderWorksList(container, list, groupName = "") {
   container.innerHTML = "";
 
   list.forEach((work) => {
@@ -770,6 +1100,11 @@ function renderWorksList(container, list) {
     a.target = "_blank";
     a.rel = "noopener noreferrer";
     a.textContent = work.display;
+    a.classList.toggle("latin-title", isLatinSongTitle(work.display));
+
+    if (groupName === "ai" || work.section === "ai") {
+      setupAiTrackLink(a, work);
+    }
 
     li.appendChild(a);
     container.appendChild(li);
@@ -801,6 +1136,11 @@ function renderTemplateWorksList(container, list, groupName) {
     a.rel = "noopener noreferrer";
     a.textContent = displayTitle;
     a.title = displayTitle;
+    a.classList.toggle("latin-title", isLatinSongTitle(displayTitle));
+
+    if (groupName === "ai" || work.section === "ai") {
+      setupAiTrackLink(a, work);
+    }
 
     li.appendChild(a);
     container.appendChild(li);
@@ -812,6 +1152,31 @@ function renderTemplateWorksList(container, list, groupName) {
     li.textContent = "暂无作品";
     container.appendChild(li);
   }
+}
+
+function setupAiTrackLink(anchor, work) {
+  const title = getTemplateDisplayTitle(work, "ai");
+  anchor.href = "#stagePlayer";
+  anchor.target = "";
+  anchor.rel = "";
+  anchor.dataset.aiTrack = getAiTrackKey(work);
+  anchor.title = `${title}（点击本页播放）`;
+  anchor.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    playAiTrack(work);
+  });
+}
+
+function handleTemplateGridClick(event) {
+  const anchor = event.target.closest("a[data-ai-track]");
+  if (!anchor) return;
+
+  const work = state.aiPlaylist.find((item) => getAiTrackKey(item) === anchor.dataset.aiTrack);
+  if (!work) return;
+
+  event.preventDefault();
+  playAiTrack(work);
 }
 
 function getTemplateDisplayTitle(work, groupName) {
@@ -850,13 +1215,21 @@ function isTemplateDuplicateLead(work, groupName) {
   const text = `${work.display || ""} ${work.file || ""}`.toLowerCase();
 
   const duplicateRules = {
-    musical: /hamilton\s*-\s*satisfied|satisfied\s+from\s+hamilton/,
+    musical: /$a/,
     english: /ed\s*sheeran\s*-\s*shape\s*of\s*you|shape\s*of\s*you\s*\(ed\s*sheeran\)/,
     chinese: /$a/,
     ai: /星光练习曲|原创伴奏/
   };
 
   return duplicateRules[groupName]?.test(text) ?? false;
+}
+
+function isLatinSongTitle(text) {
+  const value = String(text || "");
+  const latinCount = (value.match(/[A-Za-z]/g) || []).length;
+  const cjkCount = (value.match(/[\u3400-\u9fff]/g) || []).length;
+
+  return latinCount > 0 && latinCount >= cjkCount;
 }
 
 function shuffleArray(list) {
