@@ -89,6 +89,7 @@ const ICONS = {
 };
 
 const AI_STREAM_BASE_URL = window.AI_STREAM_BASE_URL || "";
+const DATA_VERSION = "20260530-ai-fix";
 
 const STAGE_SLIDES = {
   female: Array.from({ length: 9 }, (_, i) => `./assets/slides-optimized/female/female-${i + 1}.jpg`),
@@ -916,7 +917,7 @@ async function loadWorksLibrary() {
   }
 
   try {
-    const resp = await fetch("./assets/data/ai_songs.json");
+    const resp = await fetch(`./assets/data/ai_songs.json?v=${DATA_VERSION}`);
     const fetchedAiSongs = await resp.json();
     if (Array.isArray(fetchedAiSongs)) aiSongs = fetchedAiSongs;
   } catch (error) {
@@ -1083,8 +1084,9 @@ function groupWorks(works) {
 function uniqueByUrl(list) {
   const seen = new Set();
   return list.filter((item) => {
-    if (!item.url || seen.has(item.url)) return false;
-    seen.add(item.url);
+    const key = item.url || item.file || item.id || item.display || item.title;
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
     return true;
   });
 }
