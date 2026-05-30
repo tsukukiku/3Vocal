@@ -721,7 +721,8 @@ function findAiPlaylistIndex(work) {
 function getAiStreamUrl(work) {
   if (AI_STREAM_BASE_URL && work.file) {
     const base = AI_STREAM_BASE_URL.replace(/\/+$/, "");
-    return `${base}/${encodeURIComponent(work.file)}`;
+    const path = String(work.file).split(/[\\/]+/).map(encodeURIComponent).join("/");
+    return `${base}/${path}`;
   }
 
   return work.streamUrl || work.localUrl || work.url || "";
